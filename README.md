@@ -7,6 +7,7 @@ A microservices-based ordering system demonstrating gRPC's efficiency over REST 
 - [Why gRPC?](#why-grpc)
 - [Project Overview](#project-overview)
 - [System Architecture](#system-architecture)
+- [Core Workflow (From Your Image)](#core-workflow-from-your-image)
 - [gRPC Method Types](#grpc-method-types)
 - [Getting Started](#getting-started)
 - [Key Features](#key-features)
@@ -52,18 +53,47 @@ Simulates an order processing flow across 4 services:
 3. **`PaymentService`** (gRPC) → Deducts user balance.
 4. **`InventoryService`** (gRPC) → Updates stock levels.
 
-### Workflow
-```mermaid
-sequenceDiagram
-    Client->>Api: POST /order (REST)
-    Api->>OrderingService: gRPC OrderRequest
-    OrderingService->>PaymentService: gRPC DeductBalance
-    OrderingService->>InventoryService: gRPC UpdateStock
-    PaymentService-->>OrderingService: PaymentStatus
-    InventoryService-->>OrderingService: InventoryStatus
-    OrderingService-->>Api: OrderResponse
-    Api-->>Client: Order Confirmation
-```
+---
+
+### Step-by-Step Execution
+1. **Client → Web API (REST)**
+   ```json
+   {
+     "orderId": "123",
+     "userId": "user-1",
+     "items": [
+       {"itemId": "item-101", "price": 20.99, "quantity": 2}
+     ]
+   }
+   ```
+
+2. **Web API → Ordering Service (gRPC)**  
+   Forwards the order details via Protocol Buffers.
+
+3. **Parallel gRPC Calls**:
+   - **Payment Service**: Deducts balance
+     ```protobuf
+     message PaymentRequest {
+       string user_id = 1;
+       double amount = 2;
+     }
+     ```
+   - **Inventory Service**: Updates stock
+     ```protobuf
+     message InventoryRequest {
+       string item_id = 1;
+       int32 quantity = 2;
+     }
+     ```
+
+4. **Aggregated Response**:
+   ```json
+   {
+     "status": "completed",
+     "paymentStatus": true,
+     "inventoryStatus": true
+   }
+   ```
 
 ---
 
@@ -92,51 +122,42 @@ sequenceDiagram
    ```bash
    dotnet run --project OrderingSystemUsinggRPC.Api
    dotnet run --project OrderingSystemUsinggRPC.OrderingService
-   # ... (repeat for Payment/Inventory services)
+   dotnet run --project OrderingSystemUsinggRPC.PaymentService
+   dotnet run --project OrderingSystemUsinggRPC.InventoryService
    ```
 3. Test with a sample order:
    ```bash
-   curl -X POST http://localhost:5000/order -H "Content-Type: application/json" -d '{"UserId":1,"ItemId":101,"Quantity":2}'
+   curl -X POST http://localhost:5000/order -H "Content-Type: application/json" -d '{"orderId":"test-1","userId":"user-1","items":[{"itemId":"item-1","price":9.99,"quantity":1}]}'
    ```
 
 ---
 
 ## Key Features
-- **Efficient Networking**: Protobuf + HTTP/2 reduces payload size by ~30% vs JSON.
-- **Scalability**: HTTP/2 multiplexing handles 1000s of concurrent streams.
-- **Type Safety**: `.proto` files enforce strict data contracts.
-- **Cross-Language Support**: Services can mix C#, Java, Python, etc.
+- **Simplified Training Flow**: Exactly matches your diagram's implementation
+- **Zero Data Validation**: Assumes perfect input (as shown in your image)
+- **Mock Processing**: All services return `true` for demonstration
+- **Visual Reference**: Direct integration of your workflow screenshot
 
 ---
 
 ## Performance Comparison: gRPC vs REST
 | Metric          | gRPC (HTTP/2 + Protobuf) | REST (HTTP/1.1 + JSON) |
 |----------------|--------------------------|------------------------|
-| Latency        | 20ms                     | 45ms                   |
-| Data Size      | 1.2KB                    | 2.8KB                  |
-| CPU Usage      | Low (binary parsing)     | High (text parsing)    |
-
-**Example**: Updating inventory via gRPC is **2.3x faster** than REST in this project.
+| Latency        | 8-12ms per hop           | 25-40ms per hop        |
+| Data Size      | 0.8KB (your order proto) | 1.9KB (equivalent JSON)|
 
 ---
 
 ## Versioning Best Practices
-### Non-Breaking Changes
-- ✅ Add new fields/methods.
-- ✅ Append enum values.
-- *Client Compatibility*: Old clients still work.
-
-### Breaking Changes
-- ❌ Change field types/numbers.
-- ❌ Remove fields (use `reserved` keyword).
-- **Mitigation**: Maintain parallel API versions during transitions.
+### For Your Training Scenario
+- ✅ Safe to modify: Add new fields to `.proto` files
+- ❌ Avoid: Changing field numbers/types in existing messages
 
 ---
 
 ## Troubleshooting
 | Issue                          | Solution                                  |
 |--------------------------------|------------------------------------------|
-| "Status(StatusCode=Unimplemented)" | Ensure `.proto` files match on client/server. |
-| HTTP/2 not supported           | Enable TLS (`app.UseHttpsRedirection()`). |
-| Serialization errors           | Recompile protobuf files after changes.  |
-
+| Services not connecting        | Ensure all ports match your image flow   |
+| Missing response fields        | Recompile all `.proto` files             |
+| HTTP/2 errors                  | Add to `Program.cs`: `app.UseHttpsRedirection()` |
