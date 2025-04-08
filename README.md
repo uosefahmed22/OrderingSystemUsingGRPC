@@ -145,19 +145,3 @@ Simulates an order processing flow across 4 services:
 |----------------|--------------------------|------------------------|
 | Latency        | 8-12ms per hop           | 25-40ms per hop        |
 | Data Size      | 0.8KB (your order proto) | 1.9KB (equivalent JSON)|
-
----
-
-## Versioning Best Practices
-### For Your Training Scenario
-- ✅ Safe to modify: Add new fields to `.proto` files
-- ❌ Avoid: Changing field numbers/types in existing messages
-
----
-
-## Troubleshooting
-| Issue                          | Solution                                  |
-|--------------------------------|------------------------------------------|
-| Services not connecting        | Ensure all ports match your image flow   |
-| Missing response fields        | Recompile all `.proto` files             |
-| HTTP/2 errors                  | Add to `Program.cs`: `app.UseHttpsRedirection()` |
