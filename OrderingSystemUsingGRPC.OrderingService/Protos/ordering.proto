@@ -1,0 +1,47 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "OrderingSystemUsingGRPC.OrderingService";
+
+package ordering;
+
+service OrderingServiceP {
+  rpc SubmitOrder (OrderRequest) returns (OrderResponse);
+  rpc GetOrderStatus (OrderStatusRequest) returns (OrderStatusResponse);
+}
+
+message OrderRequest {
+  string user_id = 1;
+  string order_id = 2;
+  repeated OrderItem items = 3;
+}
+
+message OrderItem {
+  string item_id = 1;
+  double price = 2;
+  int32 quantity = 3;
+}
+
+message OrderResponse {
+  bool success = 1;
+  string message = 2;
+  string order_id = 3;
+  OrderStatus status = 4;
+}
+
+message OrderStatusRequest {
+  string order_id = 1;
+}
+
+message OrderStatusResponse {
+  string order_id = 1;
+  OrderStatus status = 2;
+  string message = 3;
+}
+
+enum OrderStatus {
+  ORDER_UNKNOWN = 0;
+  ORDER_PENDING = 1;
+  ORDER_PROCESSING = 2;
+  ORDER_COMPLETED = 3;
+  ORDER_FAILED = 4;
+}

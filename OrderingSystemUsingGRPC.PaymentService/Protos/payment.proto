@@ -1,0 +1,28 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "OrderingSystemUsingGRPC.PaymentService";
+
+package payment;
+
+service PaymentServiceP {
+  rpc DeductUserBalance (DeductUserBalanceRequest) returns (DeductUserBalanceResponse);
+}
+
+message DeductUserBalanceRequest {
+  string user_id = 1;
+  double total_price = 2;
+  string order_id = 3;
+}
+
+message DeductUserBalanceResponse {
+  bool success = 1;
+  string message = 2;
+  PaymentStatus status = 3;
+}
+
+enum PaymentStatus {
+  PAYMENT_UNKNOWN = 0;
+  PAYMENT_SUCCESSFUL = 1;
+  PAYMENT_FAILED = 2;
+  INSUFFICIENT_BALANCE = 3;
+}
