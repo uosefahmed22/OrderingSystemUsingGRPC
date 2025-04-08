@@ -12,8 +12,6 @@ A microservices-based ordering system demonstrating gRPC's efficiency over REST 
 - [Getting Started](#getting-started)
 - [Key Features](#key-features)
 - [Performance Comparison: gRPC vs REST](#performance-comparison-grpc-vs-rest)
-- [Versioning Best Practices](#versioning-best-practices)
-- [Troubleshooting](#troubleshooting)
 
 ---
 
